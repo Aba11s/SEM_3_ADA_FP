@@ -1,0 +1,96 @@
+### Program to test the 2D-packing problem solvers
+
+## Importing packages
+from bruteforce_packer import BruteForcePacker
+from greedy_packer import GreedyPacker
+from utils import Analyzer, TestGenerator, Visualizer
+from objects import Grid, PackingResult
+from copy import deepcopy
+from typing import List, Tuple
+
+import pandas as pd
+
+def example():
+    # Initialization
+    # Brute force
+    bf_packer = BruteForcePacker() # Brute-Force
+    gh_packer = GreedyPacker() # Greedy-Heuristic
+
+    # Setting up Grid
+    grid = Grid(6,6)
+
+    # Generate rectangles
+    seed = 42
+    test_case = TestGenerator.gen_test_case(4,8, (2,2), (6,6), seed)
+
+    # Execution !IMPORTANT - CREATE A DEEP COPY IF USING THE SAME TEST CASE FOR 2 OR MORE SOLVERS
+    bf_result:PackingResult; bf_result, bf_memo_usg, bf_exec_time = bf_packer.solve(bf_packer.by_brute_force, grid, deepcopy(test_case))
+    gh_result:PackingResult; gh_result, hg_memo_usg, hg_exec_time = gh_packer.solve(gh_packer.by_best_fit, grid, deepcopy(test_case))
+
+    # Result
+    print(bf_result)
+    print(gh_result)
+
+    Visualizer.visualize(bf_result.config)
+    Visualizer.visualize(gh_result.config)
+
+def test():
+    # Initialization
+    # Brute force
+    bf_packer = BruteForcePacker() # Brute-Force
+    gh_packer = GreedyPacker() # Heuristic-Greedy
+
+    # Setting up Grid
+    grid = Grid(6,6)
+
+    # Generate rectangles
+    seed = 42
+    test_cases = TestGenerator.gen_test_cases(100, 4,8, (2,2), (6,6), seed)
+
+    # Execution
+    bf_results = []
+    gh_results = []
+
+    for tc in test_cases:
+        bf_results.append(bf_packer.solve(bf_packer.by_brute_force, grid, deepcopy(tc)))
+        gh_results.append(gh_packer.solve(gh_packer.by_best_fit, grid, deepcopy(tc)))
+
+    def get_averages(results: List[Tuple[PackingResult, float, float]]) -> Tuple[float, float, float, float]:
+        # Totalling
+        total_grid_usg, total_mem_usg, total_runtime = 0,0,0
+
+        for res in results:
+            total_grid_usg += res[0].grid_usage 
+            total_mem_usg += res[1]
+            total_runtime += res[2]
+
+        l = len(results)
+        avg_grid_usg = total_grid_usg / l
+        avg_mem_usg = total_mem_usg / l
+        avg_runtime = total_runtime / l
+
+        return (avg_grid_usg, avg_mem_usg, avg_runtime, total_runtime)
+    
+    bf_avg_grid_usg, bf_avg_mem_usg, bf_avg_runtime, bf_total_runtime = get_averages(bf_results)
+    gh_avg_grid_usg, gh_avg_mem_usg, gh_avg_runtime, gh_total_runtime = get_averages(gh_results)
+
+    print(f"\nSolver: {bf_packer.by_brute_force.__name__}\n")
+    print(f"average grid usage: {bf_avg_grid_usg}")
+    print(f"average memory usage: {bf_avg_mem_usg} KiB")
+    print(f"average runtime: {bf_avg_runtime} seconds")
+    print(f"total runtime: {bf_total_runtime} seconds")
+
+    print(f"\nSolver: {gh_packer.by_best_fit.__name__}\n")
+    print(f"average grid usage: {gh_avg_grid_usg}")
+    print(f"average memory usage: {gh_avg_mem_usg} KiB")
+    print(f"average runtime: {gh_avg_runtime} seconds")
+    print(f"total runtime: {gh_total_runtime} seconds")
+
+## Entry point - main
+def main():
+    test()
+
+if __name__ == '__main__':
+    main()
+
+
