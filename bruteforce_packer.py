@@ -80,6 +80,12 @@ class BruteForcePacker:
 
         return placed_rectangles, discarded_rectangles
     
+    def _serialize_grid(self,  config:List[List[int]]) -> str:
+        '''
+        serializes the configuration into string
+        '''
+        return '\n'.join(''.join(str(cell) for cell in row) for row in config)
+    
     def _update_rect_pos(self, best_config: List[List[int]]) -> None:
         '''
         Updates the positions of rectangles based on the best configuration.
@@ -134,20 +140,22 @@ class BruteForcePacker:
 
         return best_area, best_config
     
-    def by_memoization(self, index:int=0) -> tuple:
+    # AHAHAHAHAHAHHAHAHAHAHAHAHAHAHAH
+    def by_memoization(self, index:int=0) -> Tuple[int, List[List[int]]]:
         '''
         brute-force packing solution implementing memoization technique
         '''
         # Create a unique state key based on the current index and grid state
-        state_key = (index, tuple(tuple(row) for row in self.grid))
+        state_key = (index, self._serialize_grid(self.grid))
 
         # Check if the result is already cached
         if state_key in self.memo:
+            print("CACHE FOUND")
             return self.memo[state_key]
 
         # Base case: all rectangles have been considered
         if index >= len(self.rects):
-            curr_area = self.get_occupied_area()
+            curr_area = self._get_occupied_area()
             self.memo[state_key] = (curr_area, [row[:] for row in self.grid])
             return self.memo[state_key]
 
@@ -165,15 +173,15 @@ class BruteForcePacker:
         # Case 2: Attempt to place the current rectangle
         for y in range(self.grid_height - rect.height + 1):
             for x in range(self.grid_width - rect.width + 1):
-                if self.check_fit(rect, x, y):
-                    self.place_rectangle(rect, x, y)
+                if self._check_fit(rect, x, y):
+                    self._place_rectangle(rect, x, y)
                     area, config = self.by_memoization(index + 1)
 
                     if area > best_area:
                         best_area = area
                         best_config = config
 
-                    self.remove_rectangle(rect)
+                    self._remove_rectangle(rect)
 
         # Store the best result in the memoization dictionary
         self.memo[state_key] = (best_area, best_config)

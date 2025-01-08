@@ -24,15 +24,15 @@ def example():
     test_case = TestGenerator.gen_test_case(4,8, (2,2), (6,6), seed)
 
     # Execution !IMPORTANT - CREATE A DEEP COPY IF USING THE SAME TEST CASE FOR 2 OR MORE SOLVERS
-    bf_result:PackingResult; bf_result, bf_memo_usg, bf_exec_time = bf_packer.solve(bf_packer.by_brute_force, grid, deepcopy(test_case))
+    bf_result:PackingResult; bf_result, bf_memo_usg, bf_exec_time = bf_packer.solve(bf_packer.by_memoization, grid, deepcopy(test_case))
     gh_result:PackingResult; gh_result, hg_memo_usg, hg_exec_time = gh_packer.solve(gh_packer.by_best_fit, grid, deepcopy(test_case))
 
     # Result
     print(bf_result)
-    print(gh_result)
+    #print(gh_result)
 
     Visualizer.visualize(bf_result.config)
-    Visualizer.visualize(gh_result.config)
+    #Visualizer.visualize(gh_result.config)
 
 def test():
     # Initialization
@@ -88,7 +88,7 @@ def test():
 
 ## Entry point - main
 def main():
-    test()
+    example()
 
 if __name__ == '__main__':
     main()
